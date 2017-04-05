@@ -8,6 +8,9 @@ from yelp.oauth1_authenticator import Oauth1Authenticator
 import requests
 app = Flask(__name__)
 
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')
+
 auth = Oauth1Authenticator(
     consumer_key="_3rqquCuNvP2w9-FQAlAzw",
     consumer_secret="SUWrRmcZa847aQlYZeFE4xAyrt0",
