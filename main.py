@@ -18,7 +18,7 @@ auth = Oauth1Authenticator(
 client = Client(auth)
 
 @app.route('/', methods=['GET'])
-def recomendaciones():
+def prueba():
     return "HOLI"
 
 @app.route('/abby/', methods=['POST'])
