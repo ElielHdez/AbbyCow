@@ -31,6 +31,7 @@ def recomendaciones():
     coords=r["result"]["contexts"][0]["parameters"]
     longitude=str(coords["long"])
     latitude=str(coords["lat"])
+
     params = {
     'term': 'vegan',
     'lang': 'es',
@@ -39,7 +40,6 @@ def recomendaciones():
     response=client.search_by_coordinates(latitude, longitude, **params)
 
     data={
-      "messaging_type":"RESPONSE",
       "recipient":{
         "id":user_id
       }, "message": {
@@ -53,7 +53,6 @@ def recomendaciones():
     }
     }
     data2={
-      "messaging_type":"RESPONSE",
       "recipient":{
         "id":user_id
       }, "message": {
@@ -140,16 +139,14 @@ def recomendaciones():
 
                 counter+=1
 
-    access_token="EAACBDZCzUi38BALbxAuboeAWuRO8gxfzXaLnmD0J9EZB9FJxMiAyac1iUkrP5EZBNE0ZBKdtecZB0MLlvFB7KGjZCdyweIHjeU0SnfXa7u8FIbVfHVamjlUFjJwSNp96ZCd8Xj1VqiloMZArpmjvxwPLbIT4S4xFZCbfae9pr233ZABAZDZD"
+    access_token=""
     headers= {"content-type": "application/json"}
     r = requests.post("https://graph.facebook.com/me/messages?access_token="+access_token, data = json.dumps(data), headers=headers)
-    print (r)
     r = requests.post("https://graph.facebook.com/me/messages?access_token="+access_token, data = json.dumps(data2), headers=headers)
 
     quick_reply={
-  "messaging_type":"RESPONSE",
   "recipient":{
-    "id":user_id
+    "id":"1061938300592052"
   },
   "message":{
     "text":"Anything else? Just ask.",
