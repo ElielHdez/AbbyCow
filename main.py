@@ -12,7 +12,7 @@ app = Flask(__name__)
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
 # The access token of your Facebook Messenger App
-access_token=''
+access_token='EAACBDZCzUi38BALbxAuboeAWuRO8gxfzXaLnmD0J9EZB9FJxMiAyac1iUkrP5EZBNE0ZBKdtecZB0MLlvFB7KGjZCdyweIHjeU0SnfXa7u8FIbVfHVamjlUFjJwSNp96ZCd8Xj1VqiloMZArpmjvxwPLbIT4S4xFZCbfae9pr233ZABAZDZD'
 
 @app.route('/abby/', methods=['POST'])
 def recomendaciones():
@@ -25,7 +25,7 @@ def recomendaciones():
     origins=latitude+','+longitude
     # Your Yelp Fusion API key goes here
     headers = {
-        'Authorization': 'Bearer PLACE YOUR API KEY HERE',
+        'Authorization': 'Bearer AIt4dAlCkBnYXTNPeeilwiKv-0xXdmaTlntfMMBm-bCoUlfdlFlbNS5HklSq3oqUcoAuq9ajXDssSp2qFhnoVf5dqsemwlyQpUlqzGEPTsCHOXChkITj64S4__6hWnYx',
     }
     # Include here whatever Yelp search filters you wish to apply
     payload = {
