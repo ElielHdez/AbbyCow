@@ -3,8 +3,6 @@
 import json
 from flask import Flask
 from flask import request
-from yelp.client import Client
-from yelp.oauth1_authenticator import Oauth1Authenticator
 import requests
 from dotmap import DotMap
 app = Flask(__name__)
