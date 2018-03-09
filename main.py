@@ -6,19 +6,13 @@ from flask import request
 from yelp.client import Client
 from yelp.oauth1_authenticator import Oauth1Authenticator
 import requests
+from dotmap import DotMap
 app = Flask(__name__)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    app.run()
 
-auth = Oauth1Authenticator(
-    consumer_key="_3rqquCuNvP2w9-FQAlAzw",
-    consumer_secret="SUWrRmcZa847aQlYZeFE4xAyrt0",
-    token="PDXeNGjGDwnlL-ElIaN0vd4esr-uHCyM",
-    token_secret="LWaCyn41FUmXac1OZ7Av6aYRVHg"
-)
-
-client = Client(auth)
+access_token="EAACBDZCzUi38BALbxAuboeAWuRO8gxfzXaLnmD0J9EZB9FJxMiAyac1iUkrP5EZBNE0ZBKdtecZB0MLlvFB7KGjZCdyweIHjeU0SnfXa7u8FIbVfHVamjlUFjJwSNp96ZCd8Xj1VqiloMZArpmjvxwPLbIT4S4xFZCbfae9pr233ZABAZDZD"
 
 @app.route('/', methods=['GET'])
 def prueba():
@@ -31,13 +25,21 @@ def recomendaciones():
     coords=r["result"]["contexts"][0]["parameters"]
     longitude=str(coords["long"])
     latitude=str(coords["lat"])
-    params = {
-    'term': 'vegan',
-    'lang': 'es',
-    "sort": "1"
-}
-    response=client.search_by_coordinates(latitude, longitude, **params)
+    origins=latitude+","+longitude
 
+    headers = {
+        'Authorization': 'Bearer AIt4dAlCkBnYXTNPeeilwiKv-0xXdmaTlntfMMBm-bCoUlfdlFlbNS5HklSq3oqUcoAuq9ajXDssSp2qFhnoVf5dqsemwlyQpUlqzGEPTsCHOXChkITj64S4__6hWnYx',
+    }
+
+    payload = {
+            'term': 'vegan',
+            #'categories': 'Vegan,Vegetarian',
+            'latitude': latitude,
+            'longitude': longitude,
+    }
+        
+    response = DotMap(requests.get('https://api.yelp.com/v3/businesses/search', params=payload, headers=headers).json())
+    print (response)
     data={
       "messaging_type":"RESPONSE",
       "recipient":{
@@ -67,22 +69,22 @@ def recomendaciones():
     }
     }
 
-
     counter=0
     for index, business in enumerate(response.businesses):
         if business.image_url and business.is_closed==False:
             if counter<4:
                 image=business.image_url
-                image=image[:-6]+"l"+image[-4:]
+                #image=image[:-6]+"l"+image[-4:]
+                destination_latitude = str(business.coordinates.latitude)
+                destination_longitude = str(business.coordinates.longitude)
+                destination_coordinates=destination_latitude+","+destination_longitude
 
-                destinations=str(business.location.coordinate.latitude)+","+str(business.location.coordinate.longitude)
-                origins=latitude+","+longitude
-                a=requests.get("https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&key=AIzaSyBfI7bob5KZFrPC4kQ-tzZzE63airiYsqU", params={"origins":origins, "destinations": destinations}).json()
+                a=requests.get("https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&key=AIzaSyBfI7bob5KZFrPC4kQ-tzZzE63airiYsqU", params={"origins":origins, "destinations": destination_coordinates}).json()
                 distance=a["rows"][0]["elements"][0]["distance"]["text"]
 
                 address=""
-                for x in business.location.address:
-                    address+=x+" "
+                for x in business.location.display_address[:2]: address+=x+" "
+                
                 data["message"]["attachment"]["payload"]["elements"].append({
                                         "title": business.name,
                                         "image_url": image,
@@ -91,10 +93,10 @@ def recomendaciones():
                                             {
                                                 "title": "Get Directions",
                                                 "type": "web_url",
-                                                "url": "https://maps.google.com/?saddr="+latitude+","+longitude+"&daddr="+str(business.location.coordinate.latitude)+","+str(business.location.coordinate.longitude),
+                                                "url": "https://maps.google.com/?saddr="+latitude+","+longitude+"&daddr="+destination_latitude+","+destination_longitude,
                                                 "messenger_extensions": "true",
                                                 "webview_height_ratio": "tall",
-                                                "fallback_url": "https://maps.google.com/?saddr="+latitude+","+longitude+"&daddr="+str(business.location.coordinate.latitude)+","+str(business.location.coordinate.longitude)
+                                                "fallback_url": "https://maps.google.com/?saddr="+latitude+","+longitude+"&daddr="+destination_latitude+","+destination_longitude
                                             },
                                             {
                                                 "title": "Call",
@@ -105,18 +107,21 @@ def recomendaciones():
                                     })
 
                 counter+=1
+                
+
             elif counter >=4 and counter <8:
                 image=business.image_url
-                image=image[:-6]+"l"+image[-4:]
+                #image=image[:-6]+"l"+image[-4:]
+                destination_latitude = str(business.coordinates.latitude)
+                destination_longitude = str(business.coordinates.longitude)
+                destination_coordinates=destination_latitude+","+destination_longitude
 
-                destinations=str(business.location.coordinate.latitude)+","+str(business.location.coordinate.longitude)
-                origins=latitude+","+longitude
-                a=requests.get("https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&key=AIzaSyBfI7bob5KZFrPC4kQ-tzZzE63airiYsqU", params={"origins":origins, "destinations": destinations}).json()
+                a=requests.get("https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&key=AIzaSyBfI7bob5KZFrPC4kQ-tzZzE63airiYsqU", params={"origins":origins, "destinations": destination_coordinates}).json()
                 distance=a["rows"][0]["elements"][0]["distance"]["text"]
 
                 address=""
-                for x in business.location.address:
-                    address+=x+" "
+                for x in business.location.display_address[:2]: address+=x+" "
+                
                 data2["message"]["attachment"]["payload"]["elements"].append({
                                         "title": business.name,
                                         "image_url": image,
@@ -125,10 +130,10 @@ def recomendaciones():
                                             {
                                                 "title": "Get Directions",
                                                 "type": "web_url",
-                                                "url": "https://maps.google.com/?saddr="+latitude+","+longitude+"&daddr="+str(business.location.coordinate.latitude)+","+str(business.location.coordinate.longitude),
+                                                "url": "https://maps.google.com/?saddr="+latitude+","+longitude+"&daddr="+destination_latitude+","+destination_longitude,
                                                 "messenger_extensions": "true",
                                                 "webview_height_ratio": "tall",
-                                                "fallback_url": "https://maps.google.com/?saddr="+latitude+","+longitude+"&daddr="+str(business.location.coordinate.latitude)+","+str(business.location.coordinate.longitude)
+                                                "fallback_url": "https://maps.google.com/?saddr="+latitude+","+longitude+"&daddr="+destination_latitude+","+destination_longitude
                                             },
                                             {
                                                 "title": "Call",
@@ -139,13 +144,12 @@ def recomendaciones():
                                     })
 
                 counter+=1
-
-    access_token="EAACBDZCzUi38BALbxAuboeAWuRO8gxfzXaLnmD0J9EZB9FJxMiAyac1iUkrP5EZBNE0ZBKdtecZB0MLlvFB7KGjZCdyweIHjeU0SnfXa7u8FIbVfHVamjlUFjJwSNp96ZCd8Xj1VqiloMZArpmjvxwPLbIT4S4xFZCbfae9pr233ZABAZDZD"
+            
+            
     headers= {"content-type": "application/json"}
     r = requests.post("https://graph.facebook.com/me/messages?access_token="+access_token, data = json.dumps(data), headers=headers)
-    print (r)
     r = requests.post("https://graph.facebook.com/me/messages?access_token="+access_token, data = json.dumps(data2), headers=headers)
-
+    
     quick_reply={
   "messaging_type":"RESPONSE",
   "recipient":{
