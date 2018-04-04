@@ -25,11 +25,11 @@ def recomendaciones():
     origins=latitude+','+longitude
     # Your Yelp Fusion API key goes here
     headers = {
-        'Authorization': 'Bearer PLACE YOUR API KEY HERE',
+        'Authorization': '',
     }
     # Include here whatever Yelp search filters you wish to apply
     payload = {
-            #'term': 'vegan',
+            'term': 'vegan',
             #'categories': 'Vegan,Vegetarian',
             'latitude': latitude,
             'longitude': longitude,
@@ -108,8 +108,22 @@ def recomendaciones():
                 counter+=1
     # Now completely populated, the food recommendations are sent
     headers= {'content-type': 'application/json'}
-    r = requests.post('https://graph.facebook.com/me/messages?access_token='+access_token, data = json.dumps(data), headers=headers)
-    r = requests.post('https://graph.facebook.com/me/messages?access_token='+access_token, data = json.dumps(data2), headers=headers)
+    
+    # If not business is around, a message is sent relaying this information to the user
+    imsorry={
+  'messaging_type':'RESPONSE',
+  'recipient':{
+    'id':user_id
+  },
+  'message':{
+    'text':'Very sorry to say this but I could not find any Vegan joint around',
+  }
+  }
+    if counter==0:
+        r = requests.post('https://graph.facebook.com/me/messages?access_token='+access_token, data = json.dumps(imsorry), headers=headers)
+    else:
+        r = requests.post('https://graph.facebook.com/me/messages?access_token='+access_token, data = json.dumps(data), headers=headers)
+        r = requests.post('https://graph.facebook.com/me/messages?access_token='+access_token, data = json.dumps(data2), headers=headers)
     # Afterwards, a message is sent with an embedded button to allow the user to begin again
     quick_reply={
   'messaging_type':'RESPONSE',
